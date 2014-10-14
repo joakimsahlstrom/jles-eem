@@ -13,7 +13,7 @@ import se.jsa.jles.NewEventNotificationListeners.NewEventNotificationListener;
 import se.jsa.jles.internal.util.Objects;
 
 /**
- * This class is designed to be used as a hub for keeper event consumers current with the events that are passed to an {@link EventStore}
+ * This class is designed to be used as a hub for keeping event consumers current with the events that are passed to an {@link EventStore}
  */
 public class EventService implements NewEventNotificationListener {
 	private final EventStore sourceStore;

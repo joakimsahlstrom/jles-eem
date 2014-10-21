@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import se.jsa.jles.EventQuery2;
+import se.jsa.jles.EventQuery;
 import se.jsa.jles.EventStore;
 import se.jsa.jles.NewEventNotificationListeners.NewEventNotificationListener;
 import se.jsa.jles.internal.util.Objects;
@@ -31,12 +31,12 @@ public class EventService implements NewEventNotificationListener {
 	 * @param subscription
 	 * @param eventQuery
 	 */
-	public void subscribe(EventSubscription subscription, EventQuery2 eventQuery) {
+	public void subscribe(EventSubscription subscription, EventQuery eventQuery) {
 		subscriptions.add(new ListenerNotifier(subscription, eventQuery));
 		update(subscriptions);
 	}
 
-	public void register(EventFeedReader reader, EventQuery2 eventQuery) {
+	public void register(EventFeedReader reader, EventQuery eventQuery) {
 		feeds.add(new ListenerNotifier(reader, eventQuery));
 		executor.submit(new SubscriptionEmitter());
 	}
@@ -66,7 +66,7 @@ public class EventService implements NewEventNotificationListener {
 		private final Iterator<Object> iterator;
 		private final EventListener listener;
 
-		public ListenerNotifier(EventListener listener, EventQuery2 eventQuery) {
+		public ListenerNotifier(EventListener listener, EventQuery eventQuery) {
 			this.listener = listener;
 			this.iterator = sourceStore.readEvents(eventQuery).iterator();
 		}

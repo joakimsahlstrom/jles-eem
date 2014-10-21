@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import se.jsa.jles.EventQuery;
+import se.jsa.jles.EventQuery2;
 import se.jsa.jles.EventStore;
 import se.jsa.jles.EventStoreConfigurer;
 import se.jsa.jles.eh.AsyncAssert.ValueRetriever;
@@ -49,7 +49,7 @@ public class EventServiceTest {
 		eventStore.write(expectedEvent);
 
 		final RecordingEventFeedReader subscription = new RecordingEventFeedReader();
-		eventService.register(subscription, EventQuery.query(OpenAccountEvent.class));
+		eventService.register(subscription, EventQuery2.select(OpenAccountEvent.class));
 
 		assertEqualsEventually(expectedEvent, new ValueRetriever() { @Override public Object get() { return subscription.getEvent(); } }, 50);
 	}
@@ -61,7 +61,7 @@ public class EventServiceTest {
 		eventStore.write(expectedEvent);
 		eventStore.write(expectedEvent2);
 
-		eventService.register(eventListener, EventQuery.query(OpenAccountEvent.class));
+		eventService.register(eventListener, EventQuery2.select(OpenAccountEvent.class));
 
 		assertEqualsEventually(expectedEvent, new ValueRetriever() { @Override public Object get() { return eventListener.getEvent(); } }, 50);
 		assertEqualsEventually(expectedEvent2, new ValueRetriever() { @Override public Object get() { return eventListener.getEvent(); } }, 50);
@@ -71,7 +71,7 @@ public class EventServiceTest {
 	public void eventFeed_newEventsArePassedToSubscriber() throws Exception {
 		OpenAccountEvent expectedEvent = new OpenAccountEvent(1L, "test@test.com");
 
-		eventService.register(eventListener, EventQuery.query(OpenAccountEvent.class));
+		eventService.register(eventListener, EventQuery2.select(OpenAccountEvent.class));
 
 		eventStore.write(expectedEvent);
 
@@ -87,7 +87,7 @@ public class EventServiceTest {
 			eventStore.write(createEvent(i));
 		}
 
-		eventService.register(eventListener, EventQuery.query(OpenAccountEvent.class));
+		eventService.register(eventListener, EventQuery2.select(OpenAccountEvent.class));
 
 		for (int i = firstBatchSize; i < firstBatchSize + secondBatchSize; i++) {
 			eventStore.write(createEvent(i));
@@ -109,7 +109,7 @@ public class EventServiceTest {
 		ChangeAccountNameEvent cane2 = new ChangeAccountNameEvent(2L, "n2");
 		ChangeAccountNameEvent cane3 = new ChangeAccountNameEvent(1L, "n3");
 
-		eventService.register(eventListener, EventQuery.query(OpenAccountEvent.class, ChangeAccountNameEvent.class));
+		eventService.register(eventListener, EventQuery2.select(OpenAccountEvent.class).join(ChangeAccountNameEvent.class));
 
 		write(oae1, cane1, oae2, cane2, cane3);
 
@@ -125,7 +125,7 @@ public class EventServiceTest {
 		ChangeAccountNameEvent cane3 = new ChangeAccountNameEvent(1L, "n3");
 		write(oae1, cane1, oae2, cane2, cane3);
 
-		eventService.register(eventListener, EventQuery.query(OpenAccountEvent.class, ChangeAccountNameEvent.class));
+		eventService.register(eventListener, EventQuery2.select(OpenAccountEvent.class).join(ChangeAccountNameEvent.class));
 
 		assertEventualEventsOrder(eventListener, oae1, cane1, oae2, cane2, cane3);
 	}
@@ -135,7 +135,7 @@ public class EventServiceTest {
 		OpenAccountEvent oae1 = new OpenAccountEvent(1L, "test@test.com");
 		ChangeAccountNameEvent cane1 = new ChangeAccountNameEvent(1L, "n1");
 
-		eventService.subscribe(eventListener, EventQuery.query(OpenAccountEvent.class));
+		eventService.subscribe(eventListener, EventQuery2.select(OpenAccountEvent.class));
 		write(cane1, oae1);
 
 		assertEventsOrder(eventListener, oae1);
@@ -147,7 +147,7 @@ public class EventServiceTest {
 		ChangeAccountNameEvent cane1 = new ChangeAccountNameEvent(1L, "n1");
 
 		write(cane1, oae1);
-		eventService.subscribe(eventListener, EventQuery.query(OpenAccountEvent.class));
+		eventService.subscribe(eventListener, EventQuery2.select(OpenAccountEvent.class));
 
 		assertEventsOrder(eventListener, oae1);
 	}
@@ -161,7 +161,7 @@ public class EventServiceTest {
 		ChangeAccountNameEvent cane3 = new ChangeAccountNameEvent(1L, "n3");
 
 		write(oae1, cane1);
-		eventService.subscribe(eventListener, EventQuery.query(OpenAccountEvent.class, ChangeAccountNameEvent.class));
+		eventService.subscribe(eventListener, EventQuery2.select(OpenAccountEvent.class).join(ChangeAccountNameEvent.class));
 		write(oae2, cane2, cane3);
 
 		assertEventsOrder(eventListener, oae1, cane1, oae2, cane2, cane3);
